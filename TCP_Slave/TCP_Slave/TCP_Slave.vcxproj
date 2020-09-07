@@ -70,7 +70,6 @@
     <ClCompile Include="Modbus_TCP_Init.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="InitSock.h" />
     <ClInclude Include="Modbus_One_TCP_Slave.h" />
     <ClInclude Include="Modbus_TCP_Init.h" />
   </ItemGroup>

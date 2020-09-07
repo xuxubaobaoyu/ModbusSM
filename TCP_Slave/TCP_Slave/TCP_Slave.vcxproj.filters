@@ -26,9 +26,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="InitSock.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Modbus_One_TCP_Slave.h">
       <Filter>头文件</Filter>
     </ClInclude>

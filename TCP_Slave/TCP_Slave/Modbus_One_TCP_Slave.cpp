@@ -280,7 +280,7 @@ static int TCP_ID_10(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, sho
 
 	SumAddress -= ParameterIni->Address;//计算出差值
 
-	for (int i = 13, j = 0, k = 13; k < 13 + SQuantity; k++, i += 2, j++)//13为变更数据的第一个字节
+	for (int i = 13, j = SumAddress, k = 13; k < 13 + SQuantity; k++, i += 2, j++)//13为变更数据的第一个字节
 	{
 		ParameterIni->Local_03_Address[j] = TCP_Slave[i] * 256 + TCP_Slave[i + 1];
 	}
@@ -408,8 +408,8 @@ static void ModbusTCPParameterInit_Address(ModbusTCPSlave* Address)
 	/*用于数据的输入*/
 	char str[500];
 	printf(">----------------------------------------------------------------------------<\n");
-	printf("从设备起始地址输入范围为0--65535\n");
-	printf("请输入起始地址：\n");
+	printf("从设备线圈寄存器和保持寄存器起始地址输入范围为0--65535\n");
+	printf("请输入待访问的起始地址：\n");
 	gets(str);
 	Address->Address = ParameterIsTrue(str);
 	while (Address->Address == -1 || Address->Address < 0 || Address->Address > 65535)
@@ -429,8 +429,8 @@ static void ModbusTCPParameterInit_Quantity(ModbusTCPSlave* Quantity)
 	/*用于数据的输入*/
 	char str[500];
 	printf(">----------------------------------------------------------------------------<\n");
-	printf("数量输入范围为1--10000\n");
-	printf("请输入读取数量：\n");
+	printf("线圈寄存器和保持寄存器数量输入范围为1--10000\n");
+	printf("请输入待访问的读取或写入数量：\n");
 	gets(str);
 	Quantity->Quantity = ParameterIsTrue(str);
 	while (Quantity->Quantity == -1 || Quantity->Quantity < 1 || Quantity->Quantity > 10000)
