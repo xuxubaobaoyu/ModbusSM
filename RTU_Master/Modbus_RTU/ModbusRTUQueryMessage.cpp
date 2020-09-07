@@ -147,11 +147,9 @@ int ModbusInit(char* InitNum)
 	else
 		return -1;//错误返回值为-1
 }
-
-//函数功能：对通信进行初始化
-void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
+//函数功能：显示初始界面
+static void ModbusRTUDataInitDefault(ModbusRTU* ModbusRTUData)
 {
-	char str[300];//用于读取控制台输入
 	printf("===========================================================================================\n");
 	printf("本通信软件用于Modbus RTU模式主站模式\n");
 	printf("串口默认设置如下：\n");
@@ -162,6 +160,12 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 	printf("停止位：1位\n");
 	printf("===========================================================================================\n");
 	printf("\n");//换行
+	return;
+}
+//函数功能：初始化通信超时时间
+static void ModbusRTUDataInitTimeout(ModbusRTU* ModbusRTUData)
+{
+	char str[300];//用于读取控制台输入
 	printf(">----------------------------------通信超时时间------------------------------------<\n");
 	printf("通信超时时间设置范围为50--100000（延时单位为1ms）\n");
 	printf("请输入通信超时时间：\n");
@@ -176,7 +180,12 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 	}
 	ModbusRTUData->TimeOuts = TimeOuts;
 	printf("通信超时时间输入完成\n");
-
+	return;
+}
+//函数功能：初始化设备ID
+static void ModbusRTUDataInitID(ModbusRTU* ModbusRTUData)
+{
+	char str[300];//用于读取控制台输入
 	printf(">-----------------------------------设备ID-----------------------------------------<\n");
 	printf("设备ID的设置范围为0--247（输入设备ID为0，代表广播）\n");
 	printf("请输入设备ID：\n");
@@ -191,8 +200,12 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 	}
 	ModbusRTUData->ID = ID;
 	printf("设备ID输入完成\n");
-
-
+	return;
+}
+//函数功能：初始化功能码
+static void ModbusRTUDataInitFunCode(ModbusRTU* ModbusRTUData)
+{
+	char str[300];//用于读取控制台输入
 	printf(">-----------------------------------功能码-----------------------------------------<\n");
 	printf("当前功能码只有1，3，15，16这四个，请从这四个中选择1个输入\n");
 	printf("请按十进制输入功能码：\n");
@@ -207,7 +220,7 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 			gets(str);
 			ModbusRTUData->Function = ModbusInit(str);
 		}
-		if (ID == 0 && (ModbusRTUData->Function == 1 || ModbusRTUData->Function == 3))
+		if (ModbusRTUData->ID == 0 && (ModbusRTUData->Function == 1 || ModbusRTUData->Function == 3))
 		{
 			printf("当前输入的功能码不支持广播，请重新输入\n");
 			gets(str);
@@ -215,8 +228,12 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 		else break;
 	}
 	printf("功能码输入完成\n");
-
-
+	return;
+}
+//函数功能：初始化起始地址
+static void ModbusRTUDataInitAddress(ModbusRTU* ModbusRTUData)
+{
+	char str[300];//用于读取控制台输入
 	printf(">-----------------------------------起始地址---------------------------------------<\n");
 	printf("地址输入范围为0--65535\n");
 	printf("请输入起始地址：\n");
@@ -230,15 +247,19 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 	}
 	printf("起始地址输入完成\n");
 	//memset(str, 0, sizeof(str));//清空字符串
-
-
+	return;
+}
+//函数功能：初始化数量
+static void InitQuantity(ModbusRTU* ModbusRTUData, int Num)
+{
+	char str[300];//用于读取控制台输入
 	printf(">------------------------------------数量------------------------------------------<\n");
-	printf("数量输入范围为1--2000\n");
+	printf("访问的线圈寄存器的数量输入范围为1--%d\n",Num);
 	printf("请输入读取或更改的数量：\n");
 	gets(str);
 	ModbusRTUData->RegisterQuantity = ModbusInit(str);
 	while (ModbusRTUData->RegisterQuantity == -1 || ModbusRTUData->RegisterQuantity < 1 \
-		|| ModbusRTUData->RegisterQuantity > 2000)
+		|| ModbusRTUData->RegisterQuantity > Num)
 	{
 		printf("输入错误请重新输入\n");
 		gets(str);
@@ -246,7 +267,25 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 	}
 	printf("读取或更改的数量输入完成\n");
 	printf(">----------------------------------------------------------------------------------<\n");
-
+}
+//函数功能：根据功能码初始化数量
+static void ModbusRTUDataInitRegisterQuantity(ModbusRTU* ModbusRTUData)
+{
+	switch (ModbusRTUData->Function)
+	{
+	case(0x01) : InitQuantity(ModbusRTUData, 2000); break;//01
+	case(0x0F) : InitQuantity(ModbusRTUData, 1968); break;//0F
+	case(0x03) : InitQuantity(ModbusRTUData, 125); break;//03
+	case(0x10) : InitQuantity(ModbusRTUData, 123); break;//10
+	default:
+		break;
+	}
+	return;
+}
+//函数功能：对写入的线圈或寄存器进行初始化
+static void ModbusRTUDataInit0F_10(ModbusRTU* ModbusRTUData)
+{
+	char str[300];//用于读取控制台输入
 	//对功能码0x0F输入线圈
 	if (ModbusRTUData->Function == 0x0F)//01 03 0F 10
 	{
@@ -270,7 +309,7 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 				{
 					i--;
 					break;//非正常退出
-				}	
+				}
 				else ModbusRTUData->Data_0F[i] = ModbusInit(p);//赋值
 				p = strtok(NULL, " ");
 				i++;
@@ -284,7 +323,7 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 	//对功能码0x10输入数据
 	else if (ModbusRTUData->Function == 0x10)
 	{
-	    printf(">--------------------------------保持寄存器的变更数据-----------------------------<\n");
+		printf(">--------------------------------保持寄存器的变更数据-----------------------------<\n");
 		int count = ModbusRTUData->RegisterQuantity;
 		printf("请输入 %d 个你想修改的保持寄存器的变更数据\n", count);
 		printf("数量输入范围为-32768--32767，请按十进制输入,空格隔开\n");
@@ -312,6 +351,69 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 		}
 		printf("保持寄存器的变更数据输入完成\n");
 		printf(">---------------------------------------------------------------------------------<\n");
+	}
+	return;
+}
+//函数功能：对通信进行初始化
+void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
+{
+	ModbusRTUDataInitDefault(ModbusRTUData);//默认界面
+	ModbusRTUDataInitTimeout(ModbusRTUData);//超时时间
+	ModbusRTUDataInitID(ModbusRTUData);//访问的从设备ID
+	ModbusRTUDataInitFunCode(ModbusRTUData);//功能码
+	ModbusRTUDataInitAddress(ModbusRTUData);//起始地址
+	ModbusRTUDataInitRegisterQuantity(ModbusRTUData);//访问寄存器或线圈数量
+	ModbusRTUDataInit0F_10(ModbusRTUData);//对待写入的线圈或寄存器进行写入
+	return;
+}
+//函数功能；用于控制台重复选择ID、功能码、数量等
+void DataReelect(ModbusRTU* ModbusRTUData)
+{
+	char str[300];//用于读取控制台输入
+	printf("\n"); printf("\n"); printf("\n");
+	printf("请选择以下编号以执行相应操作：\n");
+	printf("1、重新输入待访问的从设备ID\n");
+	printf("2、重新输入功能码\n");
+	printf("3、重新输入起始地址\n");
+	printf("4、重新输入待访问的寄存器或线圈数量和数值\n");
+	printf("5、重发上次的查询报文\n");
+	gets(str);
+	int Num = ModbusInit(str);
+	while (Num == -1 || Num != 1 && \
+		Num != 2 && Num != 3 && Num != 4 && Num != 5)
+	{
+		printf("输入错误请重新输入\n");
+		gets(str);
+		Num = ModbusInit(str);
+	}
+	switch (Num)
+	{
+	case(1) :
+		ModbusRTUDataInitID(ModbusRTUData); break;//访问的从设备ID
+	case(2) :
+		ModbusRTUDataInitFunCode(ModbusRTUData); break;//功能码
+	case(3) :
+		ModbusRTUDataInitAddress(ModbusRTUData); break;//起始地址
+	case(4) :
+		ModbusRTUDataInitRegisterQuantity(ModbusRTUData);//访问寄存器或线圈数量
+		ModbusRTUDataInit0F_10(ModbusRTUData); //对待写入的线圈或寄存器进行写入
+		break;
+	case(5) : break;
+	default:
+		break;
+	}
+	return;
+}
+//函数功能：判断回车
+void SpaceIsTrue()
+{
+	printf("请按空格发送报文\n");
+	char ch;
+	gets(&ch);
+	while (ch != '\0')
+	{
+		printf("输入错误，请重新输入\n");
+		gets(&ch);
 	}
 	return;
 }
