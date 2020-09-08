@@ -34,9 +34,8 @@ int main()
 			else{
 				printf("等待接收响应报文超时\n");
 			}
-			printf("\n");//换行
-			printf("\n");//换行
-			DataReelect(&ModbusRTUWData);//判断是否重新访问
+			printf("\n");printf("\n");//换行
+			DataReelect(&ModbusRTUWData);//判断是否重新输入访问参数
 		}
 	}
 	CloseHandle(hCom);//关闭句柄

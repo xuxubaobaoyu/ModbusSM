@@ -57,23 +57,19 @@ bool ComRead(HANDLE hCom, LPBYTE buf, int &len)
 	BOOL rtn = FALSE;
 	//设置读取1个字节数据，当缓存中有数据到达时则会立即返回，否则直到超时
 	rtn = ReadFile(hCom, buf, 1, &ReadSize, NULL);
-
 	//如果是超时rtn=true但是ReadSize=0，如果有数据到达，会读取一个字节ReadSize=1
-	if (rtn == TRUE && 1 == ReadSize)
-	{
+	if (rtn == TRUE && 1 == ReadSize){
 		DWORD Error;
 		COMSTAT cs = { 0 };
 		int ReadLen = 0;
 		//查询剩余多少字节未读取，存储于cs.cbInQue中
 		ClearCommError(hCom, &Error, &cs);
 		ReadLen = (cs.cbInQue > len) ? len : cs.cbInQue;
-		if (ReadLen > 0)
-		{
+		if (ReadLen > 0){
 			//由于之前等待时以读取一个字节，所欲buf+1
 			rtn = ReadFile(hCom, buf + 1, ReadLen, &ReadSize, NULL);
 			len = 0;
-			if (rtn)
-			{
+			if (rtn){
 				len = ReadLen + 1;
 			}
 		}
