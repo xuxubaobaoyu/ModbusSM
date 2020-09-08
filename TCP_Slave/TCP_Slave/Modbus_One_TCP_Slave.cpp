@@ -48,7 +48,7 @@ static int MBAPCodeIsTrue(unsigned char* TCP_Slave, short int QRecv, unsigned ch
 {
 	if (QRecv != 12 && (TCP_Slave[7] == 0x01 || TCP_Slave[7] == 0x03))//判断长度是否正确,0x01和0x03查询报文长度一定是12
 	{
-		printf("帧格式错误\n");
+		printf("帧格式错误1\n");
 		return 1;
 	}
 	if (TCP_Slave[2] != 0 || TCP_Slave[3] != 0)//判断MBAP报文头中的协议标识符是否正确
@@ -69,7 +69,7 @@ static int MBAPCodeIsTrue(unsigned char* TCP_Slave, short int QRecv, unsigned ch
 		if (sum == 6 && QRecv == 12) return 0;//若查询报文正确，则MBAP字节长度一定是6，总长度一定是12
 		else
 		{
-			printf("查询报文的帧格式不对\n");
+			printf("查询报文的帧格式不对2\n");
 			return 1;
 		}
 	}
@@ -231,7 +231,7 @@ static int TCP_ID_0F(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, sho
 	//判断变更字节数是否匹配
 	if (QRecv - 13 != TCP_Slave[12] || TCP_Slave[12] == 0)//字节数为0
 	{
-		printf("数据帧格式错误\n");
+		printf("数据帧格式错误0F\n");
 		return 0;
 	}
 
@@ -269,7 +269,7 @@ static int TCP_ID_10(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, sho
 	//判断变更字节数是否匹配
 	if (QRecv - 13 != TCP_Slave[12] || TCP_Slave[12] == 0)//字节数为0
 	{
-		printf("数据帧格式错误\n");
+		printf("数据帧格式错误10\n");
 		return 0;
 	}
 
