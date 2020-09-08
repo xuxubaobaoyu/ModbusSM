@@ -370,44 +370,56 @@ void ModbusRTUDataInit(ModbusRTU* ModbusRTUData)
 void DataReelect(ModbusRTU* ModbusRTUData)
 {
 	char str[300];//用于读取控制台输入
+	int Num = 0;
 	printf("\n"); printf("\n"); printf("\n");
-	printf("请选择以下编号以执行相应操作：\n");
+	printf(">---------------------------------------------------------------------------------<\n");
+	printf("请选择以下编号执行相应操作：\n");
 	printf("1、重新输入待访问的从设备ID\n");
 	printf("2、重新输入功能码\n");
 	printf("3、重新输入起始地址\n");
 	printf("4、重新输入待访问的寄存器或线圈数量和数值\n");
-	printf("5、重发上次的查询报文\n");
-	gets(str);
-	int Num = ModbusInit(str);
-	while (Num == -1 || Num != 1 && \
-		Num != 2 && Num != 3 && Num != 4 && Num != 5)
+	printf("5、退出选择\n");
+	printf(">---------------------------------------------------------------------------------<\n");
+	while (Num != 5)
 	{
-		printf("输入错误请重新输入\n");
 		gets(str);
 		Num = ModbusInit(str);
-	}
-	switch (Num)
-	{
-	case(1) :
-		ModbusRTUDataInitID(ModbusRTUData); break;//访问的从设备ID
-	case(2) :
-		ModbusRTUDataInitFunCode(ModbusRTUData); break;//功能码
-	case(3) :
-		ModbusRTUDataInitAddress(ModbusRTUData); break;//起始地址
-	case(4) :
-		ModbusRTUDataInitRegisterQuantity(ModbusRTUData);//访问寄存器或线圈数量
-		ModbusRTUDataInit0F_10(ModbusRTUData); //对待写入的线圈或寄存器进行写入
-		break;
-	case(5) : break;
-	default:
-		break;
+		while (Num == -1 || Num != 1 && Num != 2 \
+			&& Num != 3 && Num != 4 && Num != 5)
+		{
+			printf("输入错误请重新输入\n");
+			gets(str);
+			Num = ModbusInit(str);
+		}
+		switch (Num)
+		{
+		case(1) :
+			ModbusRTUDataInitID(ModbusRTUData); break;//访问的从设备ID
+		case(2) :
+			ModbusRTUDataInitFunCode(ModbusRTUData); break;//功能码
+		case(3) :
+			ModbusRTUDataInitAddress(ModbusRTUData); break;//起始地址
+		case(4) :
+			ModbusRTUDataInitRegisterQuantity(ModbusRTUData);//访问寄存器或线圈数量
+			ModbusRTUDataInit0F_10(ModbusRTUData); //对待写入的线圈或寄存器进行写入
+			break;
+		case(5) : break;
+		default:
+			break;
+		}
+		if (Num != 5)
+		{
+			printf("\n");
+			printf("请继续选择编号执行相应操作：\n");
+			printf("\n");
+		}
 	}
 	return;
 }
 //函数功能：判断回车
 void SpaceIsTrue()
 {
-	printf("请按空格发送报文\n");
+	printf("请按回车发送报文\n");
 	char ch;
 	gets(&ch);
 	while (ch != '\0')

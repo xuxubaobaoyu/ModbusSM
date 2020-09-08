@@ -33,18 +33,17 @@ int main()
 				printf("响应报文如下：\n");
 				for (int i = 0; i < len; i++)
 					printf("%02X ", ReadBuf[i]);
-				printf("\n");//换行
-				printf("\n");//换行
 			}
 			else
 			{
 				printf("等待接收响应报文超时\n");
 			}
+			printf("\n");//换行
+			printf("\n");//换行
 			DataReelect(&ModbusRTUWData);//判断是否重新访问
 		}
 	}
-
 	CloseHandle(hCom);//关闭句柄
-	//system("pause");
+	system("pause");
 	return 0;
 }
