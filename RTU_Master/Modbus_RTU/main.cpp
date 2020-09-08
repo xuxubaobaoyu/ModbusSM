@@ -14,7 +14,7 @@ int main()
 	ModbusRTUQuery ModbusRTUWData;//定义一个存放初始值的结构体
 	ModbusRTUDataInit(&ModbusRTUWData);//进行初始化例如ID、Function等
 	//初始化串口
-	hCom = InitCOM("COM1", ModbusRTUWData.TimeOuts);//端口号、通信超时时间
+	hCom = InitCOM("COM4", ModbusRTUWData.TimeOuts);//端口号、通信超时时间
 	while (1){
 		SpaceIsTrue();
 		//发送查询报文
@@ -26,10 +26,11 @@ int main()
 			bool b = false;
 			b = ComRead(hCom, ReadBuf, len);//端口号、存储数组、访问字节数//用于判断
 			if (b){
-				DecomposeMessage(WriteBUF, ReadBuf, &ModbusRTUWData);
 				printf("响应报文如下：\n");
 				for (int i = 0; i < len; i++)
 					printf("%02X ", ReadBuf[i]);
+				int Num = DecomposeMessage(WriteBUF, ReadBuf, &ModbusRTUWData);
+				SlaveData(ReadBuf, &ModbusRTUWData, Num);
 			}
 			else{
 				printf("等待接收响应报文超时\n");

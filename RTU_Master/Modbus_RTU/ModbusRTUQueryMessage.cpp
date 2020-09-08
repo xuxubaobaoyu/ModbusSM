@@ -100,7 +100,7 @@ unsigned int ModbusRTUQueryMessage(unsigned char* WriteBUF, ModbusRTU* ModbusRTU
 	{
 	case(0x01) ://功能码01
 	case(0x03) ://功能码03
-				return ModbusFun01and03(WriteBUF, ModbusRTUQuery);
+		return ModbusFun01and03(WriteBUF, ModbusRTUQuery);
 	case(0x0F) ://功能码0F
 		return ModbusFun0F(WriteBUF, ModbusRTUQuery);
 	case(0x10) ://功能码10
@@ -428,4 +428,5 @@ void SpaceIsTrue()
 		gets(&ch);
 	}
 	return;
+
 }

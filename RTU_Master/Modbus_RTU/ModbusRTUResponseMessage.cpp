@@ -61,11 +61,11 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 	{
 		unsigned long CRC = crc16(ReadBuf, Num + 3);//再进行CRC校验
 		//CRC低位  高位
-		if (CRC % 256 == ReadBuf[Num + 3] && CRC / 256 == ReadBuf[Num + 4])
+		if ((CRC % 256) == ReadBuf[Num + 3] && (CRC >> 8) == ReadBuf[Num + 4])
 			return Num + 3;
 		else
 		{
-			printf("响应报文CRC校验未通过错误\n");
+			printf("响应报文CRC校验未通过错误01\n");
 			return 0;
 		}
 	}
@@ -73,7 +73,7 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 	{
 		unsigned long CRC = crc16(ReadBuf, 3);//进行CRC校验
 		//CRC低位  高位
-		if (CRC % 256 == ReadBuf[3] && CRC / 256 == ReadBuf[4])
+		if ((CRC % 256) == ReadBuf[3] && (CRC >> 8) == ReadBuf[4])
 		{
 			ErrorCode(ReadBuf[2]);//对错误进行显示
 			//对读取到的数据进行显示
@@ -81,7 +81,7 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 		}
 		else
 		{
-			printf("响应报文CRC校验未通过错误\n");
+			printf("响应报文CRC校验未通过错误01\n");
 			return 0;
 		}
 	}
@@ -95,21 +95,29 @@ static int ModbusRTURead_0Fand10(unsigned char* WriteBUF, unsigned char* ReadBuf
 	{
 		unsigned long CRC = crc16(ReadBuf, 6);//进行CRC校验
 		//CRC低位  高位
-		if (CRC % 256 == ReadBuf[6] && CRC / 256 == ReadBuf[7])
-			return 8;
+		if ((CRC % 256) == ReadBuf[6] && (CRC >> 8) == ReadBuf[7]){
+			if (WriteBUF[2] == ReadBuf[2])//再判起始地址高位
+				return 8;
+			else
+				return 0;
+		}
+		else{
+			printf("响应报文CRC校验未通过错误10\n");
+			return 0;
+		}
 	}
 	else if (WriteBUF[1] + 0x80 == ReadBuf[1])//判断是否是异常码
 	{
 		unsigned long CRC = crc16(ReadBuf, 3);//进行CRC校验
 		//CRC低位  高位
-		if (CRC % 256 == ReadBuf[3] && CRC / 256 == ReadBuf[4])
+		if ((CRC % 256) == ReadBuf[3] && (CRC >> 8)== ReadBuf[4])
 		{
 			ErrorCode(ReadBuf[2]);//对错误进行显示
 			return 8;
 		}
 		else
 		{
-			printf("响应报文CRC校验未通过错误\n");
+			printf("响应报文CRC校验未通过错误10\n");
 			return 0;
 		}
 	}
@@ -138,4 +146,23 @@ int DecomposeMessage(unsigned char* WriteBUF,unsigned char* ReadBuf, ModbusRTUQu
 		break;
 	}
 	return 0;
+}
+//函数功能：显示01和03吗的响应数据
+void SlaveData(unsigned char* ReadBuf, ModbusRTUQuery* FUN,int Num)
+{
+	if (ReadBuf[1] == 0x01){
+		printf("读取到的数据：");
+		for (int j = 3; j < Num; j++){
+			printf("%02X ", ReadBuf[j]);
+		}
+		printf("\n");
+	}
+	else if (ReadBuf[1] == 0x03){
+		printf("读取到的数据：");
+		for (int j = 3; j < Num; j += 2){
+			printf("%02X ", ReadBuf[j] * 256 + ReadBuf[j + 1]);
+		}
+		printf("\n");
+	}
+	return;
 }
