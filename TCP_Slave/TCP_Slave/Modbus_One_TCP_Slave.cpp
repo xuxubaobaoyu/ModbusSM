@@ -10,6 +10,23 @@ static void AddressQuantuty(unsigned char* TCP_Slave, int* SumAddress, int* SQua
 	*SQuantity += TCP_Slave[11];//访问的数量低位
 	return;
 }
+//函数功能；返回异常码
+static void CodeNum(unsigned char* TCP_Slave, int Num)
+{
+	TCP_Slave[5] = 0x03;//后续字节长度
+
+	TCP_Slave[7] += 0x80;//加上0x80
+	if (Num == 1){
+		TCP_Slave[8] = 0x01;//说明从站设备不支持这个功能码
+	}
+	else if (Num == 2){
+		TCP_Slave[8] = 0x02;//说明地址在从设备中不存在
+	}
+	else if (Num == 3){
+		TCP_Slave[8] = 0x03;//说明访问的是非法数据值
+	}
+	return;
+}
 //函数功能：实现对异常码03的检查
 static int AbnormalCode03(unsigned char* TCP_Slave, int Code, int sum)
 {
@@ -31,10 +48,7 @@ static int AbnormalCode03(unsigned char* TCP_Slave, int Code, int sum)
 		if (Num != TCP_Slave[12])//判断查询报文想要的写入的字节数与查询报文
 		{
 			printf("非法数据值\n");
-			TCP_Slave[5] = 0x03;//后续字节长度
-
-			TCP_Slave[7] += 0x80;//加上0x80
-			TCP_Slave[8] = 0x03;//说明访问的是非法数据值
+			CodeNum(TCP_Slave, 3);
 			return 9;//返回需要返回给客户端的一帧数据的长度
 		}
 		else
@@ -85,10 +99,7 @@ static int MBAPCodeIsTrue(unsigned char* TCP_Slave, short int QRecv, unsigned ch
 	}
 
 	printf("功能码不匹配\n");
-	TCP_Slave[5] = 0x03;//后续字节长度
-
-	TCP_Slave[7] += 0x80;//加上0x80
-	TCP_Slave[8] = 0x01;//说明从站设备不支持这个功能码
+	CodeNum(TCP_Slave, 1);//说明从站设备不支持这个功能码
 	return 9;//返回需要返回给客户端的一帧数据的长度
 }
 
@@ -105,29 +116,36 @@ static int AddressIsTrue(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni)
 	if (SumAddress < ParameterIni->Address)//判断地址是否在从设备中不存在
 	{
 		printf("地址从设备中不存在\n");
-		TCP_Slave[5] = 0x03;//后续字节长度
-
-		TCP_Slave[7] += 0x80;//加上0x80
-		TCP_Slave[8] = 0x02;//说明地址在从设备中不存在
+		CodeNum(TCP_Slave, 2);//说明地址在从设备中不存在
 		return 9;//返回需要返回给客户端的一帧数据的长度
 	}
 
 	if ((add + SQuantity) > ParameterIni->Quantity)//判断是不是非法数据值，即指定的数据超过范围或者不允许使用
 	{
 		printf("指定的数据超过范围\n");
-		TCP_Slave[5] = 0x03;//后续字节长度
-
-		TCP_Slave[7] += 0x80;//加上0x80
-		TCP_Slave[8] = 0x02;//说明访问指定的数据超过范围
+		CodeNum(TCP_Slave, 2);//说明地址在从设备中不存在
 		return 9;//返回需要返回给客户端的一帧数据的长度
 	}
 	int sum = 9999;//可以访问的线圈寄存器的最大地址
 	if (SQuantity == 0 || SumAddress > 9999)//当访问数量为0或者访问地址超过，错误
 	{
-		TCP_Slave[5] = 0x03;//后续字节长度
-
-		TCP_Slave[7] += 0x80;//加上0x80
-		TCP_Slave[8] = 0x03;//说明访问指定的数据超过范围
+		CodeNum(TCP_Slave, 3);//说明访问指定的数据超过范围
+		return 9;//返回需要返回给客户端的一帧数据的长度
+	}
+	if (SQuantity > 2000 && TCP_Slave[7] == 1){//01
+		CodeNum(TCP_Slave, 3);//说明访问指定的数据超过范围
+		return 9;//返回需要返回给客户端的一帧数据的长度
+	}
+	else if (SQuantity > 1968 && TCP_Slave[7] == 15){//15
+		CodeNum(TCP_Slave, 3);//说明访问指定的数据超过范围
+		return 9;//返回需要返回给客户端的一帧数据的长度
+	}
+	else if (SQuantity > 125 && TCP_Slave[7] == 3){//03
+		CodeNum(TCP_Slave, 3);//说明访问指定的数据超过范围
+		return 9;//返回需要返回给客户端的一帧数据的长度
+	}
+	else if (SQuantity > 123 && TCP_Slave[7] == 16){//16
+		CodeNum(TCP_Slave, 3);//说明访问指定的数据超过范围
 		return 9;//返回需要返回给客户端的一帧数据的长度
 	}
 	return 0;
@@ -141,10 +159,7 @@ static int TCP_ID_01(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni)
 	if (TCP_Slave[6] == 0)
 	{
 		printf("功能码01不支持广播\n");
-		TCP_Slave[5] = 0x03;//后续字节长度
-
-		TCP_Slave[7] += 0x80;//加上0x80
-		TCP_Slave[8] = 0x01;//从站中不允许使用
+		CodeNum(TCP_Slave, 1);//从站中不允许使用
 		return 9;//返回需要返回给客户端的一帧数据的长度
 	}
 	else
@@ -193,11 +208,8 @@ static int TCP_ID_03(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni)
 	//ID==0代表为广播，但功能码03不支持广播
 	if (TCP_Slave[6] == 0)
 	{
-		printf("功能码03不支持广播\n");
-		TCP_Slave[5] = 0x03;//后续字节长度
-
-		TCP_Slave[7] += 0x80;//加上0x80
-		TCP_Slave[8] = 0x01;//从站中不允许使用
+		printf("功能码01不支持广播\n");
+		CodeNum(TCP_Slave, 1);//从站中不允许使用
 		return 9;//返回需要返回给客户端的一帧数据的长度
 	}
 	//判断查询报文中的地址和数量是否和本地匹配
@@ -308,10 +320,7 @@ static int FunctionCode(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, 
 		break;
 	}
 	printf("功能码不匹配\n");
-	TCP_Slave[5] = 0x03;//后续字节长度
-
-	TCP_Slave[7] += 0x80;//加上0x80
-	TCP_Slave[8] = 0x01;//说明从站设备不支持这个功能码
+	CodeNum(TCP_Slave, 1);//从站中不允许使用
 	return 9;//返回需要返回给客户端的一帧数据的长度
 }
 
