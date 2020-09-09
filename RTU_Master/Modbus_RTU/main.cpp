@@ -21,8 +21,10 @@ int main()
 		int length = ModbusRTUQueryMessage(WriteBUF, &ModbusRTUWData);
 		ComWrite(hCom, WriteBUF, length);//发送数据
 		if (ModbusRTUWData.ID != 0){//判断是否是广播，以此判断需不需要读取返回值
-			BYTE ReadBuf[300];//用于读取缓冲
-			int len = ReadBufLength(&ModbusRTUWData);//先计算响应报文的长度,设备ID为0,即广播就不用读取
+			unsigned char ReadBuf[300];//用于读取缓冲
+			memset(ReadBuf, 0, 300);
+			//int len = ReadBufLength(&ModbusRTUWData);//先计算响应报文的长度,设备ID为0,即广播就不用读取
+			int len = 0;
 			bool b = false;
 			b = ComRead(hCom, ReadBuf, len);//端口号、存储数组、访问字节数//用于判断
 			if (b){

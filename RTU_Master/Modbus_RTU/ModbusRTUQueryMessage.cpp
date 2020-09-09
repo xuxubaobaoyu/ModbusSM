@@ -106,7 +106,7 @@ unsigned int ModbusRTUQueryMessage(unsigned char* WriteBUF, ModbusRTU* ModbusRTU
 	case(0x10) ://¹¦ÄÜÂë10
 		return ModbusFun10(WriteBUF, ModbusRTUQuery);
 	default:
-			   break;
+		break;
 	}
 	return 0;
 }
