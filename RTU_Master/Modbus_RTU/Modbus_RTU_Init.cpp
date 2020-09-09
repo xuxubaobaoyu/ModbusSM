@@ -41,7 +41,7 @@ HANDLE InitCOM(char* COM, DWORD Delay)
 	//读每个字符间隔超过1.5个字符则为无效字符，9600波特率下计算出为1.7多，这里设为2
 	ct.ReadIntervalTimeout = 5;//读间隔超时
 	//间隔超时和总超时的设置是不相关的
-	ct.ReadTotalTimeoutConstant = 0;//读时间常量
+	ct.ReadTotalTimeoutConstant = Delay;//读时间常量
 	ct.ReadTotalTimeoutMultiplier = 0;//读时间系数
 
 	ct.WriteTotalTimeoutMultiplier = 1;//写时间常量
@@ -54,12 +54,9 @@ HANDLE InitCOM(char* COM, DWORD Delay)
 
 bool ComRead(HANDLE hCom, LPBYTE buf, int &len)
 {
-	len = 300;
 	DWORD ReadSize = 0;
 	BOOL rtn = FALSE;
 	bool flag = false;
-
-	//设置读取1个字节数据，当缓存中有数据到达时则会立即返回，否则直到超时
 
 	rtn = ReadFile(hCom, (char*)buf, 1024, &ReadSize, NULL);
 	len = ReadSize;

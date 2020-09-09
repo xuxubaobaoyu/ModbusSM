@@ -285,7 +285,7 @@ static void ModbusRTUDataInitRegisterQuantity(ModbusRTU* ModbusRTUData)
 //函数功能：对写入的线圈或寄存器进行初始化
 static void ModbusRTUDataInit0F_10(ModbusRTU* ModbusRTUData)
 {
-	char str[300];//用于读取控制台输入
+	char str[1024];//用于读取控制台输入
 	//对功能码0x0F输入线圈
 	if (ModbusRTUData->Function == 0x0F)//01 03 0F 10
 	{
