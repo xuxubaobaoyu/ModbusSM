@@ -71,6 +71,7 @@ bool ComRead(HANDLE hCom, LPBYTE buf, int &len)
 
 bool ComWrite(HANDLE hCom, LPBYTE buf, int &len)
 {
+	//这里清缓存的目的是防止我还没给你发送指令你就开始给我发送数据了，这个接收的数据不能要
 	PurgeComm(hCom, PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR | PURGE_TXABORT);
 	//PurgeComm(hCom, PURGE_TXCLEAR | PURGE_TXABORT);
 	BOOL rtn = FALSE;
@@ -79,7 +80,6 @@ bool ComWrite(HANDLE hCom, LPBYTE buf, int &len)
 	rtn = WriteFile(hCom, buf, len, &WriteSize, NULL);
 	len = WriteSize;
 
-	//PurgeComm(hCom, PURGE_RXABORT | PURGE_RXCLEAR);//这里清缓存的目的是防止我还没给你发送指令你就开始给我发送数据了，这个接收的数据不能要
 	return rtn != FALSE;
 }
 

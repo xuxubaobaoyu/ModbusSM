@@ -14,7 +14,13 @@ int main()
 	ModbusRTUQuery ModbusRTUWData;//定义一个存放初始值的结构体
 	ModbusRTUDataInit(&ModbusRTUWData);//进行初始化例如ID、Function等
 	//初始化串口
-	hCom = InitCOM("COM1", ModbusRTUWData.TimeOuts);//端口号、通信超时时间
+	hCom = InitCOM("COM3", ModbusRTUWData.TimeOuts);//端口号、通信超时时间
+	if (hCom == INVALID_HANDLE_VALUE)
+	{
+		printf("串口打开失败\n");
+		system("pause");
+		return 0;
+	}
 	while (1){
 		SpaceIsTrue();
 		//发送查询报文

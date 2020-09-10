@@ -153,7 +153,7 @@ static void ModbusRTUDataInitDefault(ModbusRTU* ModbusRTUData)
 	printf("===========================================================================================\n");
 	printf("本通信软件用于Modbus RTU模式主站模式\n");
 	printf("串口默认设置如下：\n");
-	printf("端口号：COM1\n");
+	printf("端口号：COM\n");
 	printf("波特率：9600 Baud\n");
 	printf("数据位：8位\n");
 	printf("奇偶校验位：无校验\n");
