@@ -38,8 +38,7 @@ HANDLE InitCOM(char* COM, DWORD Delay)
 
 	COMMTIMEOUTS ct;//设定读超时
 	//COMMTIMEOUTS结构的成员都以毫秒为单位
-	//读每个字符间隔超过1.5个字符则为无效字符，9600波特率下计算出为1.7多，这里设为2
-	ct.ReadIntervalTimeout = 5;//读间隔超时
+	ct.ReadIntervalTimeout = 20;//读间隔超时
 	//间隔超时和总超时的设置是不相关的
 	ct.ReadTotalTimeoutConstant = Delay;//读时间常量
 	ct.ReadTotalTimeoutMultiplier = 0;//读时间系数
