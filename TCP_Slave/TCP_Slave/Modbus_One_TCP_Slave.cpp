@@ -65,6 +65,10 @@ static int MBAPCodeIsTrue(unsigned char* TCP_Slave, short int QRecv, unsigned ch
 		printf("帧格式错误1\n");
 		return 1;
 	}
+	if (QRecv < 12){
+		printf("帧格式错误1\n");
+		return 1;
+	}
 	if (TCP_Slave[2] != 0 || TCP_Slave[3] != 0)//判断MBAP报文头中的协议标识符是否正确
 	{
 		printf("MBAP报文头的协议标识符错误\n");

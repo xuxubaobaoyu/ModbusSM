@@ -41,6 +41,7 @@ int main()
 		else if (nRecv > 0)
 		{
 			unsigned char buff_unchar[N];
+			memset(buff_unchar, -1 ,N);
 			printf(" 接收到数据：\n");
 			for (int i = 0; i < nRecv; i++)
 			{
