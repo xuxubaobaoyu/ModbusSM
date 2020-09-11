@@ -25,7 +25,11 @@ int main()
 		SpaceIsTrue();
 		//发送查询报文
 		int length = ModbusRTUQueryMessage(WriteBUF, &ModbusRTUWData);
-		ComWrite(hCom, WriteBUF, length);//发送数据
+		bool a = ComWrite(hCom, WriteBUF, length);//发送数据
+		if (a == false){
+			printf("发送数据失败\n");
+			continue;
+		}
 		if (ModbusRTUWData.ID != 0){//判断是否是广播，以此判断需不需要读取返回值
 			unsigned char ReadBuf[N];//用于读取缓冲
 			memset(ReadBuf, 0, N);
