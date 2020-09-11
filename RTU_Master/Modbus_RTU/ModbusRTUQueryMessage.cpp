@@ -420,12 +420,12 @@ void DataReelect(ModbusRTU* ModbusRTUData)
 void SpaceIsTrue()
 {
 	printf("请按回车发送报文\n");
-	char ch;
-	gets(&ch);
-	while (ch != '\0')
+	char str[300];
+	gets(str);
+	while (str[0] != '\0')
 	{
 		printf("输入错误，请重新输入\n");
-		gets(&ch);
+		gets(str);
 	}
 	return;
 
