@@ -12,4 +12,5 @@ using namespace std;
 unsigned int ReadBufLength(ModbusRTUQuery* Length);
 int DecomposeMessage(unsigned char* WriteBUF, unsigned char* ReadBuf, ModbusRTUQuery* FUN);
 void SlaveData(unsigned char* ReadBuf, ModbusRTUQuery* FUN, int Num);
+void SlaveShow(ModbusRTUQuery* SlaveS, int ReSize, unsigned char* WriteBUF, unsigned char* ReadBuf, int* TimeOutsNum);
 #endif/*__MODBUSRTURESPONSEMESSAGE_H*/

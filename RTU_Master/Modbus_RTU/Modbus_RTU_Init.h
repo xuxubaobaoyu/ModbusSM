@@ -4,10 +4,12 @@
 #include <iostream>
 #include <Windows.h>
 #include <process.h>
-
+#include "ModbusRTUQueryMessage.h"
 using namespace std;
 
-HANDLE InitCOM(char* COM, DWORD Delay);
+
+HANDLE InitUSART(DWORD Delay);
 bool ComRead(HANDLE hCom, LPBYTE buf, int &len);
 bool ComWrite(HANDLE hCom, LPBYTE buf, int &len);
+void InputCOM(void* hCom, ModbusRTUQuery* Delay);
 #endif	/*_MODBUS_RTU_INIT_H*/

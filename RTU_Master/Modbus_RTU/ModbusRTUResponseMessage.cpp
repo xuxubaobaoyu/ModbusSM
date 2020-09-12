@@ -58,6 +58,11 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 	}
 	else if (FUN->Function == 3)//03码的寄存器数量计算
 		Num = FUN->RegisterQuantity * 2;
+	if ((3 + Num) == strlen((const char*)ReadBuf))
+	{
+		printf("字节长度不对\n");
+		return 0;
+	}
 
 	if (WriteBUF[1] == ReadBuf[1] && Num == ReadBuf[2])//先判断功能码和查询报文期望的数据域字节数是否匹配
 	{
@@ -93,12 +98,17 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 //函数功能：实现对功能码0F和10的解析与判断
 static int ModbusRTURead_0Fand10(unsigned char* WriteBUF, unsigned char* ReadBuf, ModbusRTUQuery* FUN)
 {
+	if (8 == strlen((const char*)ReadBuf))
+	{
+		printf("字节长度不对\n");
+		return 0;
+	}
 	if (WriteBUF[1] == ReadBuf[1])//先判断功能码是否正确
 	{
 		unsigned long CRC = crc16(ReadBuf, 6);//进行CRC校验
 		//CRC低位  高位
 		if ((CRC % 256) == ReadBuf[6] && (CRC >> 8) == ReadBuf[7]){
-			if (WriteBUF[2] == ReadBuf[2] && WriteBUF[3] == ReadBuf[3] && WriteBUF[4] == ReadBuf[4]&&\
+			if (WriteBUF[2] == ReadBuf[2] && WriteBUF[3] == ReadBuf[3] && WriteBUF[4] == ReadBuf[4] && \
 				WriteBUF[5] == ReadBuf[5])//再判起始地址，数量
 				return 8;
 			else
@@ -113,7 +123,7 @@ static int ModbusRTURead_0Fand10(unsigned char* WriteBUF, unsigned char* ReadBuf
 	{
 		unsigned long CRC = crc16(ReadBuf, 3);//进行CRC校验
 		//CRC低位  高位
-		if ((CRC % 256) == ReadBuf[3] && (CRC >> 8)== ReadBuf[4])
+		if ((CRC % 256) == ReadBuf[3] && (CRC >> 8) == ReadBuf[4])
 		{
 			ErrorCode(ReadBuf[2]);//对错误进行显示
 			return 8;
@@ -130,7 +140,7 @@ static int ModbusRTURead_0Fand10(unsigned char* WriteBUF, unsigned char* ReadBuf
 //函数功能：解析响应报文
 //参数：查询报文、接收报文，
 //返回值用于对ReadBuf显示的长度指定
-int DecomposeMessage(unsigned char* WriteBUF,unsigned char* ReadBuf, ModbusRTUQuery* FUN)
+int DecomposeMessage(unsigned char* WriteBUF, unsigned char* ReadBuf, ModbusRTUQuery* FUN)
 {
 	if (WriteBUF[0] != ReadBuf[0])
 	{
@@ -139,7 +149,7 @@ int DecomposeMessage(unsigned char* WriteBUF,unsigned char* ReadBuf, ModbusRTUQu
 	}
 	switch (FUN->Function)//根据查询报文的功能码调用不同的函数
 	{
-	case(0x01) :		
+	case(0x01) :
 	case(0x03) :
 			   return ModbusRTURead_01and03(WriteBUF, ReadBuf, FUN);
 	case(0x0F) :
@@ -151,7 +161,7 @@ int DecomposeMessage(unsigned char* WriteBUF,unsigned char* ReadBuf, ModbusRTUQu
 	return 0;
 }
 //函数功能：显示01和03吗的响应数据
-void SlaveData(unsigned char* ReadBuf, ModbusRTUQuery* FUN,int Num)
+void SlaveData(unsigned char* ReadBuf, ModbusRTUQuery* FUN, int Num)
 {
 	if (ReadBuf[1] == 0x01){
 		printf("读取到的数据：");
@@ -167,5 +177,39 @@ void SlaveData(unsigned char* ReadBuf, ModbusRTUQuery* FUN,int Num)
 		}
 		printf("\n");
 	}
+	return;
+}
+
+//函数功能：解析与显示响应报文
+void SlaveShow(ModbusRTUQuery* SlaveS, int ReSize, unsigned char* WriteBUF, unsigned char* ReadBuf, int* TimeOutsNum)
+{
+	int len = ReadBufLength(SlaveS);//根据查询报文计算应该读取多少个响应报文的数据
+	if ((ReSize / len) >= 1){
+		for (int j = *TimeOutsNum; j < (ReSize / len); j++){
+			printf("响应报文如下：\n");
+			unsigned char Rbuf[N] = { 0 };
+			for (int i = j * len, k = 0; i < len*(j + 1); i++, k++){
+				printf("%02X ", ReadBuf[i]);
+				Rbuf[k] = ReadBuf[i];
+			}
+			int Num = DecomposeMessage(WriteBUF, Rbuf, SlaveS);//解析响应报文
+			SlaveData(Rbuf, SlaveS, Num);//显示01和03吗的响应数据
+		}
+		*TimeOutsNum = 0;//清空超时次数
+	}
+	else if (ReSize == 5){
+		printf("响应报文如下：\n");
+		unsigned char Rbuf[N] = { 0 };
+		for (int j = 0; j < ReSize; j++){
+			printf("%02X ", ReadBuf[j]);
+			Rbuf[j] = ReadBuf[j];
+		}
+		int Num = DecomposeMessage(WriteBUF, Rbuf, SlaveS);//解析响应报文
+		SlaveData(Rbuf, SlaveS, Num);//显示01和03吗的响应数据		
+	}
+	else {
+		printf("接收数据与希望的接收数据不一样\n");
+	}
+	printf("\n"); printf("\n");//换行
 	return;
 }

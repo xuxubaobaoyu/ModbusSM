@@ -8,7 +8,7 @@
 //（4） 关闭串口
 
 
-HANDLE InitCOM(char* COM, DWORD Delay)
+static HANDLE InitCOM(char* COM, DWORD Delay)
 {
 	HANDLE hCom = INVALID_HANDLE_VALUE;//全局变量，串口句柄
 	hCom = CreateFile(COM, //COM口
@@ -64,7 +64,7 @@ bool ComRead(HANDLE hCom, LPBYTE buf, int &len)
 	{
 		flag = true;
 	}
-	//PurgeComm函数清空串口的输入输出缓冲区
+	//PurgeComm函数清空串口的接收缓冲区
 	PurgeComm(hCom, PURGE_RXABORT | PURGE_RXCLEAR);
 	return flag;
 }
@@ -80,7 +80,31 @@ bool ComWrite(HANDLE hCom, LPBYTE buf, int &len)
 	rtn = WriteFile(hCom, buf, len, &WriteSize, NULL);
 	len = WriteSize;
 
-
 	return rtn != FALSE;
 }
 
+//函数功能：初始化串口
+HANDLE InitUSART(DWORD Delay)
+{
+	volatile HANDLE hCom;
+	char COM[300] = { 0 };
+	gets(COM);
+	hCom = InitCOM(COM, Delay);//端口号、通信超时时间
+	while (hCom == INVALID_HANDLE_VALUE){
+		printf("串口打开失败，请重新输入串口\n");
+		gets(COM);
+		hCom = InitCOM(COM, Delay);//端口号、通信超时时间
+	}
+	printf("===========================================================================================\n");
+	return hCom;
+}
+
+//函数功能：重新重新输入端口号
+void InputCOM(void* hCom, ModbusRTUQuery* Delay)
+{
+	printf("发送数据失败\n");
+	CloseHandle(hCom);//关闭句柄
+	printf("请重新输入COM\n");
+	hCom = InitUSART(Delay->TimeOuts);
+	return;
+}
