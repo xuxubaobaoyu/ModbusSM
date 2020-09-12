@@ -44,6 +44,8 @@ static void ErrorCode(int Code)
 	default:
 		break;
 	}
+	printf("异常码不存在\n");
+	return;
 }
 //函数功能：实现对功能码01和03的解析与判断
 static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf, ModbusRTUQuery* FUN)
@@ -96,7 +98,8 @@ static int ModbusRTURead_0Fand10(unsigned char* WriteBUF, unsigned char* ReadBuf
 		unsigned long CRC = crc16(ReadBuf, 6);//进行CRC校验
 		//CRC低位  高位
 		if ((CRC % 256) == ReadBuf[6] && (CRC >> 8) == ReadBuf[7]){
-			if (WriteBUF[2] == ReadBuf[2])//再判起始地址高位
+			if (WriteBUF[2] == ReadBuf[2] && WriteBUF[3] == ReadBuf[3] && WriteBUF[4] == ReadBuf[4]&&\
+				WriteBUF[5] == ReadBuf[5])//再判起始地址，数量
 				return 8;
 			else
 				return 0;

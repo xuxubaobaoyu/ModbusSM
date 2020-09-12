@@ -80,6 +80,7 @@ bool ComWrite(HANDLE hCom, LPBYTE buf, int &len)
 	rtn = WriteFile(hCom, buf, len, &WriteSize, NULL);
 	len = WriteSize;
 
+
 	return rtn != FALSE;
 }
 

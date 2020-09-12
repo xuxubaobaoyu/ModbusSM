@@ -14,9 +14,8 @@ int main()
 	ModbusRTUQuery ModbusRTUWData;//定义一个存放初始值的结构体
 	ModbusRTUDataInit(&ModbusRTUWData);//进行初始化例如ID、Function等
 	//初始化串口
-	hCom = InitCOM("COM1", ModbusRTUWData.TimeOuts);//端口号、通信超时时间
-	if (hCom == INVALID_HANDLE_VALUE)
-	{
+	hCom = InitCOM("COM4", ModbusRTUWData.TimeOuts);//端口号、通信超时时间
+	if (hCom == INVALID_HANDLE_VALUE){
 		printf("串口打开失败\n");
 		system("pause");
 		return 0;
@@ -28,7 +27,8 @@ int main()
 		bool a = ComWrite(hCom, WriteBUF, length);//发送数据
 		if (a == false){
 			printf("发送数据失败\n");
-			continue;
+			system("pause");
+			return 0;
 		}
 		if (ModbusRTUWData.ID != 0){//判断是否是广播，以此判断需不需要读取返回值
 			unsigned char ReadBuf[N];//用于读取缓冲
@@ -39,8 +39,7 @@ int main()
 			b = ComRead(hCom, ReadBuf, ReSize);//端口号、存储数组、访问字节数//用于判断
 			int len = ReadBufLength(&ModbusRTUWData);//根据查询报文计算应该读取多少个响应报文的数据
 			if (b){
-				for (int j = 0; j < ReSize; j++)
-				{
+				for (int j = 0; j < ReSize; j++){
 					printf("响应报文如下：\n");
 					for (int i = 0; i < len; i++){
 
