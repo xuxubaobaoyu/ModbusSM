@@ -33,15 +33,24 @@ int main()
 		if (ModbusRTUWData.ID != 0){//判断是否是广播，以此判断需不需要读取返回值
 			unsigned char ReadBuf[N];//用于读取缓冲
 			memset(ReadBuf, 0, N);//清空上次接收到的数据
-			int len = ReadBufLength(&ModbusRTUWData);//根据查询报文计算应该读取多少个响应报文的数据
+			
+			int ReSize = 0;//存储实际读取到的字节数
 			bool b = false;
-			b = ComRead(hCom, ReadBuf, len);//端口号、存储数组、访问字节数//用于判断
+			b = ComRead(hCom, ReadBuf, ReSize);//端口号、存储数组、访问字节数//用于判断
+			int len = ReadBufLength(&ModbusRTUWData);//根据查询报文计算应该读取多少个响应报文的数据
 			if (b){
-				printf("响应报文如下：\n");
-				for (int i = 0; i < len; i++)
-					printf("%02X ", ReadBuf[i]);
-				int Num = DecomposeMessage(WriteBUF, ReadBuf, &ModbusRTUWData);//解析响应报文
-				SlaveData(ReadBuf, &ModbusRTUWData, Num);//显示01和03吗的响应数据
+				for (int j = 0; j < ReSize; j++)
+				{
+					printf("响应报文如下：\n");
+					for (int i = 0; i < len; i++){
+
+						printf("%02X ", ReadBuf[i]);
+					}
+						
+					int Num = DecomposeMessage(WriteBUF, ReadBuf, &ModbusRTUWData);//解析响应报文
+					SlaveData(ReadBuf, &ModbusRTUWData, Num);//显示01和03吗的响应数据
+					printf("\n"); printf("\n");//换行
+				}
 			}
 			else{
 				printf("等待接收响应报文超时\n");
