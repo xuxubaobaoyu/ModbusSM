@@ -100,11 +100,10 @@ HANDLE InitUSART(DWORD Delay)
 }
 
 //函数功能：重新重新输入端口号
-void InputCOM(void* hCom, ModbusRTUQuery* Delay)
+HANDLE InputCOM(void* hCom, ModbusRTUQuery* Delay)
 {
 	printf("发送数据失败\n");
 	CloseHandle(hCom);//关闭句柄
 	printf("请重新输入COM\n");
-	hCom = InitUSART(Delay->TimeOuts);
-	return;
+	return InitUSART(Delay->TimeOuts);	
 }

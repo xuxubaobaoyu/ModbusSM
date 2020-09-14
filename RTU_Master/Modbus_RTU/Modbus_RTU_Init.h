@@ -11,5 +11,5 @@ using namespace std;
 HANDLE InitUSART(DWORD Delay);
 bool ComRead(HANDLE hCom, LPBYTE buf, int &len);
 bool ComWrite(HANDLE hCom, LPBYTE buf, int &len);
-void InputCOM(void* hCom, ModbusRTUQuery* Delay);
+HANDLE InputCOM(void* hCom, ModbusRTUQuery* Delay);
 #endif	/*_MODBUS_RTU_INIT_H*/

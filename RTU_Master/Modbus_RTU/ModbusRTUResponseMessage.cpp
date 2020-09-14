@@ -58,12 +58,6 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 	}
 	else if (FUN->Function == 3)//03码的寄存器数量计算
 		Num = FUN->RegisterQuantity * 2;
-	if ((3 + Num) == strlen((const char*)ReadBuf))
-	{
-		printf("字节长度不对\n");
-		return 0;
-	}
-
 	if (WriteBUF[1] == ReadBuf[1] && Num == ReadBuf[2])//先判断功能码和查询报文期望的数据域字节数是否匹配
 	{
 		unsigned long CRC = crc16(ReadBuf, Num + 3);//再进行CRC校验
@@ -92,17 +86,13 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 			return 0;
 		}
 	}
-	printf("响应报文的功能码或数据域字节数错误\n");
+	if (FUN->flag == 0)
+		printf("响应报文的功能码或数据域字节数错误\n");
 	return 0;
 }
 //函数功能：实现对功能码0F和10的解析与判断
 static int ModbusRTURead_0Fand10(unsigned char* WriteBUF, unsigned char* ReadBuf, ModbusRTUQuery* FUN)
 {
-	if (8 == strlen((const char*)ReadBuf))
-	{
-		printf("字节长度不对\n");
-		return 0;
-	}
 	if (WriteBUF[1] == ReadBuf[1])//先判断功能码是否正确
 	{
 		unsigned long CRC = crc16(ReadBuf, 6);//进行CRC校验
@@ -134,7 +124,8 @@ static int ModbusRTURead_0Fand10(unsigned char* WriteBUF, unsigned char* ReadBuf
 			return 0;
 		}
 	}
-	printf("响应报文的功能码错误\n");
+	if (FUN->flag == 0)
+		printf("响应报文的功能码错误\n");
 	return 0;
 }
 //函数功能：解析响应报文
@@ -144,7 +135,8 @@ int DecomposeMessage(unsigned char* WriteBUF, unsigned char* ReadBuf, ModbusRTUQ
 {
 	if (WriteBUF[0] != ReadBuf[0])
 	{
-		printf("响应报文的设备ID错误\n");
+		if (FUN->flag == 0)//判断是正常进入还是超时进入
+			printf("响应报文的设备ID错误\n");
 		return 0;
 	}
 	switch (FUN->Function)//根据查询报文的功能码调用不同的函数
@@ -181,35 +173,52 @@ void SlaveData(unsigned char* ReadBuf, ModbusRTUQuery* FUN, int Num)
 }
 
 //函数功能：解析与显示响应报文
-void SlaveShow(ModbusRTUQuery* SlaveS, int ReSize, unsigned char* WriteBUF, unsigned char* ReadBuf, int* TimeOutsNum)
+void SlaveShow(ModbusRTUQuery* SlaveS, int ReSize, unsigned char* WriteBUF, unsigned char* ReadBuf)
 {
 	int len = ReadBufLength(SlaveS);//根据查询报文计算应该读取多少个响应报文的数据
-	if ((ReSize / len) >= 1){
-		for (int j = *TimeOutsNum; j < (ReSize / len); j++){
+	unsigned char Rbuf[N] = { 0 };
+	if (ReSize >= 5){
+		/*******************************异常报文***************************************/
+		memset(Rbuf, 0, len + 1);//先清空
+		for (int i = ReSize - 3, k = 2; k >= 0; i--, k--){
+			Rbuf[k] = ReadBuf[i];//取出3字节数据
+		}
+		unsigned long CRC = crc16(Rbuf, 3);//进行CRC校验
+		//CRC低位  高位
+		if ((CRC % 256) == ReadBuf[ReSize - 2] && (CRC >> 8) == ReadBuf[ReSize - 1]){
+			Rbuf[3] = ReadBuf[ReSize - 2];
+			Rbuf[4] = ReadBuf[ReSize - 1];
 			printf("响应报文如下：\n");
-			unsigned char Rbuf[N] = { 0 };
-			for (int i = j * len, k = 0; i < len*(j + 1); i++, k++){
-				printf("%02X ", ReadBuf[i]);
-				Rbuf[k] = ReadBuf[i];
+			for (int i = 0; i < 5; i++){
+				printf("%02X ", Rbuf[i]);
 			}
 			int Num = DecomposeMessage(WriteBUF, Rbuf, SlaveS);//解析响应报文
-			SlaveData(Rbuf, SlaveS, Num);//显示01和03吗的响应数据
+			SlaveData(Rbuf, SlaveS, Num);//显示01和03码的响应数据
+			printf("\n"); printf("\n");//换行
+			return;
 		}
-		*TimeOutsNum = 0;//清空超时次数
-	}
-	else if (ReSize == 5){
-		printf("响应报文如下：\n");
-		unsigned char Rbuf[N] = { 0 };
-		for (int j = 0; j < ReSize; j++){
-			printf("%02X ", ReadBuf[j]);
-			Rbuf[j] = ReadBuf[j];
+		/*******************************正常报文***************************************/
+		else if (ReSize >= len){//判断实际字节是否有我希望的字节长
+			memset(Rbuf, 0, len + 1);//先清空
+			for (int i = ReSize - 3, k = len - 3; k >= 0; i--, k--){
+				Rbuf[k] = ReadBuf[i];//取出len个字节数据
+			}
+			unsigned long CRC = crc16(Rbuf, len - 2 );//进行CRC校验
+			//CRC低位  高位
+			if ((CRC % 256) == ReadBuf[ReSize - 2] && (CRC >> 8) == ReadBuf[ReSize - 1]){
+				Rbuf[len - 2] = ReadBuf[ReSize - 2];
+				Rbuf[len - 1] = ReadBuf[ReSize - 1];
+				printf("响应报文如下：\n");
+				for (int i = 0; i < len; i++){
+					printf("%02X ", Rbuf[i]);
+				}
+				int Num = DecomposeMessage(WriteBUF, Rbuf, SlaveS);//解析响应报文
+				SlaveData(Rbuf, SlaveS, Num);//显示01和03码的响应数据
+				printf("\n"); printf("\n");//换行
+				return;
+			}
 		}
-		int Num = DecomposeMessage(WriteBUF, Rbuf, SlaveS);//解析响应报文
-		SlaveData(Rbuf, SlaveS, Num);//显示01和03吗的响应数据		
 	}
-	else {
-		printf("接收数据与希望的接收数据不一样\n");
-	}
-	printf("\n"); printf("\n");//换行
+	printf("接收数据与希望的接收数据不一样\n\n");	
 	return;
 }

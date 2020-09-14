@@ -18,6 +18,7 @@ typedef struct ModbusRTU
 	int RegisterQuantity;//寄存器数
 	unsigned char Data_0F[N];//0F变更数据数组
 	short Data_10[N];//01变更数据数组
+	int flag;//用于判断显示
 }ModbusRTUQuery;
 
 //从设备地址、功能码、起始地址、寄存器数，0F变更数据数组,01变更数据数组
