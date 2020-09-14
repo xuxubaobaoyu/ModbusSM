@@ -30,10 +30,11 @@ int main()
 			int ReSize = 0;//存储实际读取到的字节数
 			bool b = ComRead(hCom, ReadBuf, ReSize);//端口号、存储数组、访问字节数//用于判断	
 			if (b) {
-				ModbusRTUWData.flag = 0;//默认为0
 				SlaveShow(&ModbusRTUWData, ReSize, WriteBUF, ReadBuf);//解析与显示响应报文
+				ModbusRTUWData.flag = 0;//清0
 			}
 			else{
+				ModbusRTUWData.flag = 1;
 				printf("等待接收响应报文超时\n");
 			}
 			printf("\n"); printf("\n");//换行
