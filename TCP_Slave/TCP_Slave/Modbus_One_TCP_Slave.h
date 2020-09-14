@@ -14,7 +14,7 @@ typedef struct ModbusTCPSlave
 	int Address;//从设备起始地址
 	int Quantity;//从设备寄存器或线圈数量
 	unsigned char Local_01_Address[2600];//从设备保持寄存器，用于01功能码的情况
-	short Local_03_Address[10000];//从设备，用于03功能码的情况
+	short Local_03_Address[10002];//从设备，用于03功能码的情况
 }ModbusTCPSlave;
 
 int Modbus_One_TCP_Slave(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, short QRecv);
