@@ -86,8 +86,7 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 			return 0;
 		}
 	}
-	if (FUN->flag == 0)
-		printf("响应报文的功能码或数据域字节数错误\n");
+	printf("响应报文的功能码或数据域字节数错误\n");
 	return 0;
 }
 //函数功能：实现对功能码0F和10的解析与判断
@@ -124,8 +123,7 @@ static int ModbusRTURead_0Fand10(unsigned char* WriteBUF, unsigned char* ReadBuf
 			return 0;
 		}
 	}
-	if (FUN->flag == 0)
-		printf("响应报文的功能码错误\n");
+	printf("响应报文的功能码错误\n");
 	return 0;
 }
 //函数功能：解析响应报文
@@ -135,8 +133,7 @@ int DecomposeMessage(unsigned char* WriteBUF, unsigned char* ReadBuf, ModbusRTUQ
 {
 	if (WriteBUF[0] != ReadBuf[0])
 	{
-		if (FUN->flag == 0)//判断是正常进入还是超时进入
-			printf("响应报文的设备ID错误\n");
+		printf("响应报文的设备ID错误\n");
 		return 0;
 	}
 	switch (FUN->Function)//根据查询报文的功能码调用不同的函数
