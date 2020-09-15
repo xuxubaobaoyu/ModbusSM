@@ -28,30 +28,25 @@ int main()
 		// 从客户端接收数据 
 		char buff_char[N];
 		int nRecv = recv(Listen_Client[1], buff_char, N, 0);
-		if (nRecv <= 0)
-		{
+		if (nRecv <= 0){
 			printf(" 客户端断开连接\n");
 			closesocket(Listen_Client[1]);//关闭同客户端的连接
 			Listen_Client[1] = Modbus_TCP_Accept(Listen_Client[0]);//阻塞等待客户端连接
 		}
-		else if (nRecv == SOCKET_ERROR)
-		{
+		else if (nRecv == SOCKET_ERROR){
 			printf(" 网络错误\n");
 			break;
 		}
-		else if (nRecv > 0)
-		{
+		else if (nRecv > 0){
 			unsigned char buff_unchar[N];
 			memset(buff_unchar, -1 ,N);
 			printf(" 接收到数据：\n");
-			for (int i = 0; i < nRecv; i++)
-			{
+			for (int i = 0; i < nRecv; i++){
 				buff_unchar[i] = buff_char[i];//将有符号转化为无符号
 				printf("%02X  ", buff_unchar[i]);
 			}
 			printf("\n");
 			int buf = Modbus_One_TCP_Slave(buff_unchar, &TCPSlave, nRecv);
-			//printf("%d ", TCPSlave.Local_0F_Address[0]);
 			//转换
 			for (int i = 0; i < buf; i++)
 				buff_char[i] = buff_unchar[i];
