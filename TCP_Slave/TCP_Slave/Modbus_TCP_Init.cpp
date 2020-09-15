@@ -42,7 +42,7 @@ static bool Modbus_TCP_Bind(unsigned int SListen, short int prot)
 
 	//将整型变量从主机字节顺序转变成网络字节顺序
 	sin.sin_port = htons(prot);  //1024 ~ 49151：普通用户注册的端口号
-	sin.sin_addr.S_un.S_addr = INADDR_ANY;//默认
+	sin.sin_addr.S_un.S_addr = INADDR_ANY;//选择INADDR_ANY就是允许任何IP来连接我，可以有几个，具体可以设置，若直接设置IP地址就只能指定具有这个IP地址的电脑连接
 	// 绑定这个套节字到一个本地地址 
 	//bind（上面创建的socket的套接字，
 	if (bind(SListen, (SOCKADDR*)&sin, sizeof(sin)) == SOCKET_ERROR)//判断是否赋值成功，返回-1就没成功
