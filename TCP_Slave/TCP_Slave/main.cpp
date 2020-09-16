@@ -12,11 +12,11 @@ int main()
 	ModbusTCPSlave TCPSlave;//定义初始化结构体
 	/*----------------------------------------------------------*/
 	/*功能码01的待读取、功能码0F待写入的数组*/
-	TCPSlave.Local_01_Address[0] = { 0x00 };
+	TCPSlave.Local_01_Address[0] = { 0x80 };
 	TCPSlave.Local_01_Address[1] = { 0x00 };
 
 	/*功能码03的待读取、功能码10待写入的数组*/
-	TCPSlave.Local_03_Address[1] = { 0 };
+	TCPSlave.Local_03_Address[1] = { 6 };
 	/*----------------------------------------------------------*/
 	//初始化参数
 	ModbusTCPParameterInit(&TCPSlave);
