@@ -10,7 +10,7 @@ using namespace std;
 
 //函数功能：计算从机返回的数据长度
 unsigned int ReadBufLength(ModbusRTUQuery* Length);
-int DecomposeMessage(unsigned char* WriteBUF, unsigned char* ReadBuf, ModbusRTUQuery* FUN);
+int DecomposeMessage(unsigned char* WriteBUF, unsigned char* ReadBuf);
 void SlaveData(unsigned char* ReadBuf, ModbusRTUQuery* FUN, int Num);
 void SlaveShow(ModbusRTUQuery* SlaveS, int ReSize, unsigned char* WriteBUF, unsigned char* ReadBuf);
 #endif/*__MODBUSRTURESPONSEMESSAGE_H*/
