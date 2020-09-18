@@ -81,6 +81,11 @@ static int MBAPCodeIsTrue(unsigned char* TCP_Slave, short int QRecv, unsigned ch
 	}
 	int sum = TCP_Slave[4] * 256;//用于判断接收到的数据是否正确
 	sum += TCP_Slave[5];
+	if (sum != (QRecv - 6))
+	{
+		printf("字节长度与实际长度不一致\n");
+		return 1;
+	}
 	//若查询报文是01 03功能码
 	if (TCP_Slave[7] == 0x01 || TCP_Slave[7] == 0x03)//当功能码为01或03时MBAP中的字节长度一定是6
 	{
