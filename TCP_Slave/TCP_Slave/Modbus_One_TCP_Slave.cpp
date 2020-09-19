@@ -86,14 +86,9 @@ static int MBAPCodeIsTrue(unsigned char* TCP_Slave, short int QRecv, unsigned ch
 		return 1;
 	}
 	//若查询报文是01 03功能码
-	if (TCP_Slave[7] == 0x01 || TCP_Slave[7] == 0x03)//当功能码为01或03时MBAP中的字节长度一定是6
+	if ((TCP_Slave[7] == 0x01 || TCP_Slave[7] == 0x03) && (sum == 6 && QRecv == 12))//当功能码为01或03时MBAP中的字节长度一定是6
 	{
-		if (sum == 6 && QRecv == 12) return 0;//若查询报文正确，则MBAP字节长度一定是6，总长度一定是12
-		else
-		{
-			printf("查询报文的帧格式不对2\n");
-			return 1;
-		}
+		return 0;//若查询报文正确，则MBAP字节长度一定是6，总长度一定是12
 	}
 	//查询报文0F功能码
 	else if (TCP_Slave[7] == 0x0F)
@@ -180,8 +175,7 @@ static int TCP_ID_01(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni)
 		AddressQuantuty(TCP_Slave, &SumAddress, &SQuantity);//对地址和数量进行整合
 
 		//先对响应报文的数量进行处理
-		int sum = SQuantity / 8;//直接
-		if ((SQuantity % 8) >= 1) sum++;
+		int sum = (SQuantity + 7) / 8;//直接
 
 		TCP_Slave[5] = sum + 3;//MBAP中的字节长度
 		TCP_Slave[8] = sum;//数据域字节数
@@ -189,6 +183,7 @@ static int TCP_ID_01(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni)
 		/*从指定位置读取本地寄存器数据*/
 		SumAddress -= ParameterIni->Address;
 		int num = SumAddress / 8;//用作本地寄存器数组中的访问下标，指定那个元素
+
 		int rem = SumAddress % 8;//指定那个元素的第几位开始读取	
 		unsigned char bb = ParameterIni->Local_01_Address[num];
 
@@ -197,8 +192,10 @@ static int TCP_ID_01(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni)
 		unsigned char huo[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };//用来读取每一位的数据 
 		for (int i = 8, rem_begin = rem; rem < SQuantity + rem_begin; rem++)
 		{
-			if (rem % 8 == 0 && i != 8) bb = ParameterIni->Local_01_Address[++num];
-			if ((rem - rem_begin) % 8 == 0) i++;
+			if (rem % 8 == 0 && i != 8) 
+				bb = ParameterIni->Local_01_Address[++num];
+			if ((rem - rem_begin) % 8 == 0) 
+				i++;
 			//解析
 			unsigned char buf = bb & huo[rem % 8];
 			if (buf == huo[rem % 8])//难道字节长度不一样，虽存储的数值一样大，但是就是不相等？
@@ -259,10 +256,13 @@ static int TCP_ID_0F(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, sho
 	unsigned char yu[8] = { 0xFE, 0xFD, 0xFB, 0xF7, 0xEF, 0xDF, 0xBF, 0x7F };//用来与每位数据
 	for (int i = 0, j = num; i < SQuantity; i++)
 	{
-		if ((SumAddress + i) % 8 == 0 && i != 0) j++;//移动写入数据的下标
+		if ((SumAddress + i) % 8 == 0 && i != 0) 
+			j++;//移动写入数据的下标
 		unsigned char buf = TCP_Slave[(i / 8) + 13] & huo[i % 8];//从查询报文中提取数据，同时判断是写入的是0还是1
-		if (buf == huo[i % 8]) ParameterIni->Local_01_Address[j] |= huo[(SumAddress + i) % 8];//写1
-		else ParameterIni->Local_01_Address[j] &= yu[(SumAddress + i) % 8];//写0
+		if (buf == huo[i % 8])
+			ParameterIni->Local_01_Address[j] |= huo[(SumAddress + i) % 8];//写1
+		else 
+			ParameterIni->Local_01_Address[j] &= yu[(SumAddress + i) % 8];//写0
 	}
 
 	//ID==0代表为广播，功能码0F支持广播，所以返回值有两种
@@ -326,7 +326,6 @@ int Modbus_One_TCP_Slave(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni,
 	int buf = MBAPCodeIsTrue(TCP_Slave, QRecv, ParameterIni->ID);//对MBAP报文头与功能码进行判断是否正确
 	if (buf == 9) return 9;//返回9是功能码或访问数量错误
 	if (buf == 1) return 0;//其他错误
-	if (buf == 0)
 		return FunctionCode(TCP_Slave, ParameterIni, QRecv);
 }
 
