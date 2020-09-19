@@ -38,8 +38,7 @@ static int AbnormalCode03(unsigned char* TCP_Slave, int Code, int sum)
 		AddressQuantuty(TCP_Slave, &SumAddress, &SQuantity);//计算出查询报文想要写入的字节数
 		if (Code == 0x0F)//15
 		{
-			Num = SQuantity / 8;
-			if (SQuantity % 8) Num++;
+			Num = (SQuantity + 7 ) / 8;
 		}
 		if (Code == 0x10)//16
 		{
@@ -168,8 +167,7 @@ static int TCP_ID_01(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni)
 	if (TCP_Slave[6] == 0)
 	{
 		printf("功能码01不支持广播\n");
-		CodeNum(TCP_Slave, 1);//从站中不允许使用
-		return 9;//返回需要返回给客户端的一帧数据的长度
+		return 0;//返回需要返回给客户端的一帧数据的长度
 	}
 	else
 	{
@@ -217,9 +215,8 @@ static int TCP_ID_03(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni)
 	//ID==0代表为广播，但功能码03不支持广播
 	if (TCP_Slave[6] == 0)
 	{
-		printf("功能码01不支持广播\n");
-		CodeNum(TCP_Slave, 1);//从站中不允许使用
-		return 9;//返回需要返回给客户端的一帧数据的长度
+		printf("功能码03不支持广播\n");
+		return 0;//返回需要返回给客户端的一帧数据的长度
 	}
 	//判断查询报文中的地址和数量是否和本地匹配
 	if (AddressIsTrue(TCP_Slave, ParameterIni) == 9) return 9;
@@ -249,12 +246,6 @@ static int TCP_ID_0F(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, sho
 {
 	//判断查询报文中的地址和数量是否和本地匹配
 	if (AddressIsTrue(TCP_Slave, ParameterIni) == 9) return 9;
-	//判断变更字节数是否匹配
-	if (QRecv - 13 != TCP_Slave[12] || TCP_Slave[12] == 0)//字节数为0
-	{
-		printf("数据帧格式错误0F\n");
-		return 0;
-	}
 
 	//因为是采用控制台输入的，所以按字节来读取
 	int SumAddress = 0;//用于查找存储查找的起始地址
@@ -325,12 +316,7 @@ static int FunctionCode(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, 
 		return	TCP_ID_03(TCP_Slave, ParameterIni);
 	case 0x10://写多个保持寄存器
 		return TCP_ID_10(TCP_Slave, ParameterIni, QRecv);
-	default:
-		break;
 	}
-	printf("功能码不匹配\n");
-	CodeNum(TCP_Slave, 1);//从站中不允许使用
-	return 9;//返回需要返回给客户端的一帧数据的长度
 }
 
 //函数功能：完成对接收到的数据的解析
@@ -344,130 +330,3 @@ int Modbus_One_TCP_Slave(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni,
 		return FunctionCode(TCP_Slave, ParameterIni, QRecv);
 }
 
-//函数功能：对初始化数值进行判断转换
-int ParameterIsTrue(char* InitNum)
-{
-	string duqu = InitNum;
-	int a = 0;
-	for (int j = 0; duqu[j] != '\0'; j++)//排除例123 123这样的字符串
-	{
-		if (duqu[j] != ' '&&a == 0)
-			a++;
-		if (duqu[j] == ' '&&a == 1)
-			a++;
-		if (duqu[j] != ' '&&a == 2)
-			return -1;
-	}
-
-	int sub = duqu.rfind(" ");//查找到第一个不是空格的字符
-	sub++;//空格的下一个字符就不再是空格
-	int i, num = 0, num1 = 0;
-	for (i = sub; duqu[i] != '\0'; i++)
-	{
-		if (duqu[i] <= '9'&&duqu[i] >= '0')
-		{
-			num++;
-
-		}
-	}
-	if (num > 5)//输入位数过大，防止int存不下
-		return -1;
-	if ((i - sub) == num)
-	{
-		if (atoi(InitNum) > 65535) return -1;
-		return atoi(InitNum);
-	}
-	else
-		return -1;//错误返回值为-1
-}
-
-//函数功能：初始化端口号
-static void ModbusTCPParameterInit_Port(ModbusTCPSlave* Port)
-{
-	/*用于数据的输入*/
-	char str[500];
-	printf(">----------------------------------------------------------------------------<\n");
-	printf("输入范围0--65535，但有可能有些端口被占用无法使用，可以设置为Modbus协议的默认端口502\n");
-	printf("请输入服务器端口号：\n");
-	gets(str);
-	Port->port = ParameterIsTrue(str);
-	while (Port->port == -1 || Port->port > 65535 || Port->port < 0)
-	{
-		printf("输入错误请重新输入\n");
-		gets(str);
-		Port->port = ParameterIsTrue(str);
-	}
-	printf("服务器端口输入完成\n");
-	return;
-}
-//函数功能：初始化从设备ID
-static void ModbusTCPParameterInit_ID(ModbusTCPSlave* ID)
-{
-	/*用于数据的输入*/
-	char str[500];
-	printf(">----------------------------------------------------------------------------<\n");
-	printf("设备ID的设置范围为1--247\n");
-	printf("请输入设备ID：\n");
-	gets(str);
-	ID->ID = ParameterIsTrue(str);
-	while (ID->ID == -1 || ID->ID > 247 || ID->ID < 1)
-	{
-		printf("输入错误请重新输入\n");
-		gets(str);
-		ID->ID = ParameterIsTrue(str);
-	}
-	printf("设备ID输入完成\n");
-	return;
-}
-
-//函数功能：设置当前从设备的起始地址
-static void ModbusTCPParameterInit_Address(ModbusTCPSlave* Address)
-{
-	/*用于数据的输入*/
-	char str[500];
-	printf(">----------------------------------------------------------------------------<\n");
-	printf("从设备线圈寄存器和保持寄存器起始地址输入范围为0--65535\n");
-	printf("请输入待访问的起始地址：\n");
-	gets(str);
-	Address->Address = ParameterIsTrue(str);
-	while (Address->Address == -1 || Address->Address < 0 || Address->Address > 65535)
-	{
-		printf("输入错误请重新输入\n");
-		gets(str);
-		Address->Address = ParameterIsTrue(str);
-	}
-	printf("起始地址输入完成\n");
-	//memset(str, 0, sizeof(str));//清空字符串
-	return;
-}
-
-//函数功能：设置当前从设备的待访问寄存器或线圈数量
-static void ModbusTCPParameterInit_Quantity(ModbusTCPSlave* Quantity)
-{
-	/*用于数据的输入*/
-	char str[500];
-	printf(">----------------------------------------------------------------------------<\n");
-	printf("线圈寄存器和保持寄存器数量输入范围为1--10000\n");
-	printf("请输入待访问的读取或写入数量：\n");
-	gets(str);
-	Quantity->Quantity = ParameterIsTrue(str);
-	while (Quantity->Quantity == -1 || Quantity->Quantity < 1 || Quantity->Quantity > 10000)
-	{
-		printf("输入错误请重新输入\n");
-		gets(str);
-		Quantity->Quantity = ParameterIsTrue(str);
-	}
-	printf("读取数量输入完成\n");
-	printf(">----------------------------------------------------------------------------<\n");
-	//memset(str, 0, sizeof(str));//清空字符串
-	return;
-}
-//函数功能：通过控制台初始化从设备的参数
-void ModbusTCPParameterInit(ModbusTCPSlave* Parameter)
-{
-	ModbusTCPParameterInit_Port(Parameter);//服务端的端口号
-	ModbusTCPParameterInit_ID(Parameter);//服务端的设备ID
-	ModbusTCPParameterInit_Address(Parameter);//从设备的起始地址
-	ModbusTCPParameterInit_Quantity(Parameter);//待访问寄存器或线圈数量
-	return;
-}

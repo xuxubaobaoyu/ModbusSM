@@ -69,10 +69,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Modbus_One_TCP_Slave.cpp" />
     <ClCompile Include="Modbus_TCP_Init.cpp" />
+    <ClCompile Include="TCPParameterInit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Modbus_One_TCP_Slave.h" />
     <ClInclude Include="Modbus_TCP_Init.h" />
+    <ClInclude Include="TCPParameterInit.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

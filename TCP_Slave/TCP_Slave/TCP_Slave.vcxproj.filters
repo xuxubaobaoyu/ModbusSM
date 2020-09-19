@@ -24,12 +24,18 @@
     <ClCompile Include="Modbus_TCP_Init.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TCPParameterInit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Modbus_One_TCP_Slave.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Modbus_TCP_Init.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPParameterInit.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

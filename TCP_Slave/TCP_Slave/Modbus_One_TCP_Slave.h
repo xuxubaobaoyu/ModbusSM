@@ -18,6 +18,5 @@ typedef struct ModbusTCPSlave
 }ModbusTCPSlave;
 
 int Modbus_One_TCP_Slave(unsigned char* TCP_Slave, ModbusTCPSlave* ParameterIni, short QRecv);
-int ParameterIsTrue(char* InitNum);
-void ModbusTCPParameterInit(ModbusTCPSlave* Parameter);
+
 #endif /*__MODBUS_ONE_TCP_SLAVE_H*/

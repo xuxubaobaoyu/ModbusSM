@@ -4,6 +4,7 @@
 #include <winsock2.h> /*socket通信，系统头文件*/
 #include "Modbus_One_TCP_Slave.h"
 #include "Modbus_TCP_Init.h"
+#include "TCPParameterInit.h"
 using namespace std;
 #define		N		300//接收数组的长度
 
@@ -19,7 +20,7 @@ int main()
 	TCPSlave.Local_03_Address[1] = { 6 };
 	/*----------------------------------------------------------*/
 	//初始化参数
-	ModbusTCPParameterInit(&TCPSlave);
+	ParameterInit(&TCPSlave);
 	unsigned int Listen_Client[2] = { 0 };//Listen_Client[0]存储的套接字, Listen_Client[1]存储的阻塞等待客户端
 	//初始化TCP连接
 	Modbus_TCP_Init(TCPSlave.port, Listen_Client);
