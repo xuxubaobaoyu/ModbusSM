@@ -6,13 +6,15 @@
 #include "Modbus_RTU_Init.h"
 #include "ModbusRTUQueryMessage.h"
 #include "ModbusRTUResponseMessage.h"
+#include "ModbusRTU_DataInit.h"
 using namespace std;
 int main()
 {
 	volatile HANDLE hCom;
 	unsigned char WriteBUF[N] = { 0 };//写缓冲
 	ModbusRTUQuery ModbusRTUWData;//定义一个存放初始值的结构体
-	ModbusRTUDataInit(&ModbusRTUWData);//进行初始化例如ID、Function等
+	//进行初始化例如ID、Function等
+	ParameterInit(&ModbusRTUWData);
 	//初始化串口
 	printf("请输入串口号，例COM1\n");
 	hCom = InitUSART(ModbusRTUWData.TimeOuts);
@@ -39,7 +41,7 @@ int main()
 			}
 			printf("\n"); printf("\n");//换行
 		}
-		DataReelect(&ModbusRTUWData);//判断是否重新输入访问参数
+		ParameterReelect(&ModbusRTUWData);//判断是否重新输入访问参数
 	}
 	CloseHandle(hCom);//关闭句柄
 	system("pause");

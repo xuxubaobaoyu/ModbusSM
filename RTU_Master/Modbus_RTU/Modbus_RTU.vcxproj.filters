@@ -27,6 +27,9 @@
     <ClCompile Include="ModbusRTUResponseMessage.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ModbusRTU_DataInit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Modbus_RTU_Init.h">
@@ -36,6 +39,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ModbusRTUResponseMessage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ModbusRTU_DataInit.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

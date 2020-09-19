@@ -4,6 +4,8 @@
 #include <iostream>
 #include <Windows.h>
 #include <process.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "ModbusRTUQueryMessage.h"
 using namespace std;
 

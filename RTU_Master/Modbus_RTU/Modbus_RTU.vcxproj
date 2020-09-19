@@ -69,11 +69,13 @@
     <ClCompile Include="ModbusRTUResponseMessage.cpp" />
     <ClCompile Include="Modbus_RTU_Init.cpp" />
     <ClCompile Include="ModbusRTUQueryMessage.cpp" />
+    <ClCompile Include="ModbusRTU_DataInit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModbusRTUResponseMessage.h" />
     <ClInclude Include="Modbus_RTU_Init.h" />
     <ClInclude Include="ModbusRTUQueryMessage.h" />
+    <ClInclude Include="ModbusRTU_DataInit.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
