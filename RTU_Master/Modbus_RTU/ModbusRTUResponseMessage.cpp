@@ -27,24 +27,15 @@ unsigned int ReadBufLength(ModbusRTUQuery* Length)
 //函数功能：对异常码，具体错误进行显示
 static void ErrorCode(int Code)
 {
-	switch (Code)
-	{
-	case 0x01://非法功能码
+	if (Code == 0x01){
 		printf("从站不支持此功能码\n");
 		return;
-	case 0x02://非法数据地址
+	}
+	else if (Code == 0x02){
 		printf("指定的数据地址在从站设备中不存在\n");
 		return;
-	case 0x03://非法数据值
-		printf("指定的数据超过范围或者不允许使用\n");
-		return;
-	case 0x04://从站设备故障
-		printf("从站设备处理响应的过程中，出现未知错误\n");
-		return;
-	default:
-		break;
 	}
-	printf("异常码不存在\n");
+	printf("指定的数据超过范围或者不允许使用\n");		
 	return;
 }
 //函数功能：实现对功能码01和03的解析与判断
@@ -54,8 +45,7 @@ static int ModbusRTURead_01and03(unsigned char* WriteBUF, unsigned char* ReadBuf
 	int cc = WriteBUF[4] * 256 + WriteBUF[5];
 	if (WriteBUF[1] == 1)//01码的寄存器数量计算
 	{
-		Num = cc / 8;
-		if (cc % 8) Num++;
+		Num = (cc+7) / 8;
 	}
 	else if (WriteBUF[1] == 3)//03码的寄存器数量计算
 		Num = cc * 2;
@@ -148,7 +138,6 @@ int DecomposeMessage(unsigned char* WriteBUF, unsigned char* ReadBuf)
 	default:
 		break;
 	}
-	return 0;
 }
 //函数功能：显示01和03吗的响应数据
 void SlaveData(unsigned char* ReadBuf, ModbusRTUQuery* FUN, int Num)
